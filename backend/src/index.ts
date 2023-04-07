@@ -1,6 +1,5 @@
 import express from "express";
 import bodyParser from "body-parser";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const app = express();
