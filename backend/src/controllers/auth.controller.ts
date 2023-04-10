@@ -1,8 +1,15 @@
 import jwt from "jsonwebtoken";
 import { Request, Response } from 'express';
+import User from '../models/user';
 
 export const signup = async (req: Request, res: Response) => {
-
+    delete req.body._id;
+    const user = new User({
+        ...req.body
+    });
+    user.save()
+        .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
+        .catch(error => res.status(400).json({ error }));
 }
 
 export const login = async (req: Request, res: Response) => {
@@ -33,3 +40,6 @@ function getUserByUsername(username: string) {
     const user = users.find(u => u.username === username);
     return user || null;
 }
+
+
+// mongodb+srv://sabrina_oc:sabrina_oc@cluster0.bsfbryn.mongodb.net/?retryWrites=true&w=majority
