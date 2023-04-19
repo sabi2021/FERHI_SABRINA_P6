@@ -2,14 +2,16 @@ import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import bodyParser from "body-parser";
 import mongoose from 'mongoose';
+import { config } from 'dotenv';
 
+config();
 
 import { router } from './config/router';
 
 const app: Express = express();
 const port = 3000;
 
-const url = 'mongodb+srv://sabrina_oc:sabrina_oc@cluster0.bsfbryn.mongodb.net/projet6?retryWrites=true&w=majority';
+const url = process.env.BDD || '';
 
 // Connexion à MongoDB
 mongoose.connect(url)
