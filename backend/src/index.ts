@@ -9,12 +9,11 @@ config();
 import { router } from './config/router';
 
 const app: Express = express();
-const port = 3000;
-
-const url = process.env.BDD || '';
+const port = process.env.port || 3000;
+const mongodbUrl = process.env.BDD || '';
 
 // Connexion à MongoDB
-mongoose.connect(url)
+mongoose.connect(mongodbUrl)
   .then(() => {
     console.log('Connexion réussie à MongoDB');
   })

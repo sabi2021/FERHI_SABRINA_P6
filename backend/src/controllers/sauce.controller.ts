@@ -1,6 +1,12 @@
 import { Request, Response } from 'express';
 import Sauce from '../models/sauce';
 
+interface AuthRequest extends Request {
+    auth: {
+        userId: string;
+    };
+}
+
 export const getAllSauces = async (req: Request, res: Response) => {
     try {
         res.status(201).json({ message: 'Voici les sauces !' });
@@ -9,14 +15,8 @@ export const getAllSauces = async (req: Request, res: Response) => {
     }
 }
 
-interface AuthRequest extends Request {
-    auth?: {
-      userId: string;
-    };
-  }
-
-export const saveSauce = async (req: AuthRequest, res: Response) => {
-    const userId = req.auth?.userId;
+export const saveSauce = async (req: Request, res: Response) => {
+    const userId = (req as AuthRequest).auth.userId;
     try {
         const sauceName = req.body.sauce;
         const sauceImage = req.body.image;

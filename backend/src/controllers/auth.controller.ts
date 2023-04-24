@@ -54,6 +54,3 @@ async function getUserByEmail(email: string) {
     }
     return user || null;
 }
-
-
-// mongodb+srv://sabrina_oc:sabrina_oc@cluster0.bsfbryn.mongodb.net/?retryWrites=true&w=majority
