@@ -1,6 +1,8 @@
 import { Router } from 'express';
 
 import * as authController from '../controllers/auth.controller';
+import * as sauceController from '../controllers/sauce.controller';
+import authMiddleware from "../middleware/auth";
 
 const router = Router();
 
@@ -14,6 +16,8 @@ router.use('/auth', authRoutes);
 const sauceRoutes = Router();
 // sauceRoutes.get /
 // sauceRoutes.get /:sauceId
+sauceRoutes.get("/", sauceController.getAllSauces);
+sauceRoutes.post("/", authMiddleware, sauceController.saveSauce);
 router.use('/sauces', sauceRoutes);
 
 export { router };

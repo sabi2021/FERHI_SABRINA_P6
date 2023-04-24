@@ -8,7 +8,7 @@ const userSchema: Schema = new Schema({
 
 // Définition du modèle de l'utilisateur à partir du schéma
 interface UserDoc extends Document {
-  username: string;
+  email: string;
   password: string;
 }
 
