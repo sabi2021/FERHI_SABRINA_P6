@@ -3,6 +3,8 @@ import { Router } from 'express';
 import * as authController from '../controllers/auth.controller';
 import * as sauceController from '../controllers/sauce.controller';
 import authMiddleware from "../middleware/auth";
+import upload from "../middleware/multer-config";
+
 
 const router = Router();
 
@@ -16,8 +18,11 @@ router.use('/auth', authRoutes);
 const sauceRoutes = Router();
 // sauceRoutes.get /
 // sauceRoutes.get /:sauceId
-sauceRoutes.get("/", sauceController.getAllSauces);
-sauceRoutes.post("/", authMiddleware, sauceController.saveSauce);
+sauceRoutes.get("/", authMiddleware, upload, sauceController.getAllSauces);
+sauceRoutes.get("/:id", authMiddleware, upload, sauceController.getOneSauce);
+sauceRoutes.put("/:id", authMiddleware, upload, sauceController.modifySauce);
+sauceRoutes.delete("/:id", authMiddleware, sauceController.deleteSauce);
+sauceRoutes.post("/", authMiddleware, upload, sauceController.saveSauce);
 router.use('/sauces', sauceRoutes);
 
 export { router };
