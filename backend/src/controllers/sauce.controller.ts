@@ -10,8 +10,11 @@ interface AuthRequest extends Request {
 
 //Afficher toutes les sauces
 export const getAllSauces = async (req: Request, res: Response) => {
-    Sauce.find()
-    .then(sauces => res.status(200).json(sauces))
+    Sauce.find().lean()
+    .then(sauces => {
+        const new_sauces = sauces.map(sauce => ({ ...sauce, imageUrl: `http://localhost:${process.env.port || 3000}/${sauce.imageUrl}` }))
+        res.status(200).json(new_sauces)
+    })
     .catch(error => res.status(400).json({ error }));
 }
 
@@ -23,6 +26,9 @@ export const getOneSauce = async (req: Request, res: Response) => {
         if (!sauce) {
             return res.status(404).json({ error: 'Sauce non trouvée' });
         }
+
+        sauce.imageUrl = `http://localhost:${process.env.port || 3000}/${sauce.imageUrl}`;
+
         res.status(200).json(sauce);
     })
     .catch(error => res.status(500).json({ error }));
@@ -72,24 +78,28 @@ export const deleteSauce = (req: Request, res: Response): void => {
       })
       .catch((error: Error) => res.status(500).json({ error }));
   };
+  
 
 //Création d'une sauce
 export const saveSauce = async (req: Request, res: Response) => {
     const userId = (req as AuthRequest).auth.userId;
     try {
     
-        const bodySauce = JSON.parse(req.body.sauce); //on fait l'inverse de JSON.stringify pour pouvoir accéder au champ name
-        const sauceName = bodySauce.name;
-        const sauceImage = req.file?.path;
+        const { name, manufacturer, description, mainPepper, heat } = JSON.parse(req.body.sauce); //on fait l'inverse de JSON.stringify pour pouvoir accéder au champ name
+        const imageUrl = req.file?.path;
 
-        console.log(sauceName);
         const sauce = new Sauce({
-            userId: userId,
-            name: sauceName,
-            imageUrl: sauceImage,
+            userId,
+            name,
+            description,
+            manufacturer,
+            mainPepper,
+            heat,
+            imageUrl,
             likes: 0,
             dislikes: 0,
         });
+
         await sauce.save();
         res.status(201).json({ message: 'Sauce créée !' });
     } catch (error) {

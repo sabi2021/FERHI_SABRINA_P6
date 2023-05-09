@@ -24,6 +24,7 @@ mongoose.connect(mongodbUrl)
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
+app.use('/images', express.static('images'));
 
 app.use('/api', router);
 

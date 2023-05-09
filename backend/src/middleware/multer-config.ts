@@ -16,7 +16,7 @@ const storage = diskStorage({
   filename: (req: Request, file: Express.Multer.File, callback: (error: Error | null, filename: string) => void) => {
     const name = file.originalname.split(' ').join('_');
     const extension = MIME_TYPES[file.mimetype];
-    callback(null, name + Date.now() + '.' + extension);
+    callback(null, `${Date.now()}_${name}`);
   }
 });
 
