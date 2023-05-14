@@ -37,19 +37,18 @@ export const getOneSauce = async (req: Request, res: Response) => {
 //Modification d'une sauce
 export const modifySauce = async (req: Request, res: Response) => {
     const sauceId = req.params.id;
-
+    
     try {
-        let sauceObject = JSON.parse(req.body.sauce);
-        const file = req.file;
-        
-        if (file) {
+        let sauceObject = req.body;
+   
+        if (req.file) {
             // S'il y a un fichier, mettre à jour la propriété imageUrl dans sauceObject
             sauceObject = {
                 ...sauceObject,
-                imageUrl: file.path
+                imageUrl: req.file.path
             };
         }
-
+        
         const updatedSauce = await Sauce.findOneAndUpdate({ _id: sauceId }, sauceObject, {
             new: true,
             runValidators: true
