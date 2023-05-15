@@ -21,11 +21,11 @@ export const login = async (req: Request, res: Response) => {
 
     const user = await getUserByEmail(req.body.email);
 
-    try {
-        if (!user) {
-            return res.status(401).send({ message: "Email incorrect." });
-        }
+    if (!user) {
+        return res.status(401).send({ message: "Email incorrect." });
+    }
 
+    try {
         const isPasswordValid = await bcrypt.compare(req.body.password, user.password);
         if (!isPasswordValid) {
             return res.status(401).send({ message: "Password incorrect." });
@@ -33,11 +33,12 @@ export const login = async (req: Request, res: Response) => {
             console.log("Authentification success");
         }
     } catch (error) {
-        res.status(500).json({ error });
+        return res.status(500).json({ error });
     }
     
     const jwt_secret = process.env.JWT_TOKEN || '';
-    const token = jwt.sign({ userId: user }, jwt_secret);
+    const token = jwt.sign({ userId: user._id }, jwt_secret);
+    
     res.send({ token });
 }
 

@@ -1,12 +1,7 @@
 import { Request, Response } from 'express';
 import Sauce from '../models/sauce';
-import fs from 'fs';
-
-interface AuthRequest extends Request {
-    auth: {
-        userId: string;
-    };
-}
+import fs, { cp } from 'fs';
+import { AuthRequest } from '~/middleware/auth';
 
 //Afficher toutes les sauces
 export const getAllSauces = async (req: Request, res: Response) => {
@@ -78,6 +73,59 @@ export const deleteSauce = (req: Request, res: Response): void => {
       .catch((error: Error) => res.status(500).json({ error }));
   };
   
+//Liker une sauce
+export const likeSauce = async (req: Request, res: Response) => {
+    const authRequest = req as AuthRequest;
+    const sauceId = req.params.id;
+
+    try {
+        Sauce.findOne({ _id: sauceId })
+        .then(async sauce => {
+            if (!sauce) {
+                return res.status(404).json({ error: 'Sauce non trouvée' });
+            }
+            
+            if(req.body.like == 1){
+                // l'utilisateur a liké
+                console.log("UTILISATEUR a LIKE");
+
+                let userIdStr = authRequest.auth.userId;
+                console.log('userIdStr', userIdStr);
+                   // Récupération du champ _id, pourquoi erreur ?
+                sauce.likes += req.body.like;
+                const updatedSauce = await Sauce.findOneAndUpdate({ _id: sauceId }, sauce, {
+                    new: true,
+                    runValidators: true
+                });
+
+                // console.log(updatedSauce);
+            } else if (req.body.like == -1){
+                // l'utilisateur a disliké
+                console.log("UTILISATEUR a DISLIKE");
+                sauce.dislikes = new Number(sauce.dislikes.valueOf() + (req.body.like)*-1);
+
+                const updatedSauce = await Sauce.findOneAndUpdate({ _id: sauceId }, sauce, {
+                    new: true,
+                    runValidators: true
+                });
+
+                // console.log(updatedSauce);
+            } else {
+
+            }
+            sauce.imageUrl = `http://localhost:${process.env.port || 3000}/${sauce.imageUrl}`;
+
+            res.status(200).json(sauce);
+        })
+        // if (!updatedSauce) {
+        //     return res.status(404).json({ error: 'Sauce non trouvée' });
+        // }
+
+        //res.status(200).json({ message: 'Sauce modifiée !', sauce: updatedSauce });
+    } catch (error) {
+        res.status(400).json({ error });
+    }
+};
 
 //Création d'une sauce
 export const saveSauce = async (req: Request, res: Response) => {

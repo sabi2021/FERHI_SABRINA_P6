@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-interface AuthRequest extends Request {
-  auth?: {
+export interface AuthRequest extends Request {
+  auth: {
     userId: string;
   };
 }
 
 export default function authMiddleware(
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) {
@@ -23,9 +23,12 @@ export default function authMiddleware(
       userId: string;
     };
     const userId = decodedToken.userId;
-    req.auth = {
+    const authRequest = req as AuthRequest;
+
+    authRequest.auth = {
       userId: userId,
     };
+
     next();
   } catch (error) {
     res.status(401).send("Authentication failed");
