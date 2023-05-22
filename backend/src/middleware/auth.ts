@@ -24,7 +24,6 @@ export default function authMiddleware(
     };
     const userId = decodedToken.userId;
     const authRequest = req as AuthRequest;
-
     authRequest.auth = {
       userId: userId,
     };

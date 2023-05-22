@@ -35,23 +35,34 @@ export const modifySauce = async (req: Request, res: Response) => {
     
     try {
         let sauceObject = req.body;
-   
+        const sauce = await Sauce.findOne({ _id: sauceId });
+
+        if (!sauce) {
+            return res.status(404);
+        }
+
+        if ((req as AuthRequest).auth.userId !== sauce.userId) {
+            return res.status(401);
+        }
+        
         if (req.file) {
             // S'il y a un fichier, mettre à jour la propriété imageUrl dans sauceObject
             sauceObject = {
                 ...sauceObject,
                 imageUrl: req.file.path
             };
+
+            // console.log(sauce.schema?.obj.imageUrl);
+            // const filename = sauce?.imageUrl.split('images\\')[1];
+            // fs.unlink(`images/${filename}`, () => {
+            //     console.log("image supprimée");
+            // });
         }
         
         const updatedSauce = await Sauce.findOneAndUpdate({ _id: sauceId }, sauceObject, {
             new: true,
             runValidators: true
         });
-
-        if (!updatedSauce) {
-            return res.status(404).json({ error: 'Sauce non trouvée' });
-        }
 
         res.status(200).json({ message: 'Sauce modifiée !', sauce: updatedSauce });
     } catch (error) {
@@ -63,6 +74,9 @@ export const modifySauce = async (req: Request, res: Response) => {
 export const deleteSauce = (req: Request, res: Response): void => {
     Sauce.findOne({ _id: req.params.id })
       .then((sauceFind) => {
+
+
+
         const filename = sauceFind?.imageUrl.split('/images/')[1];
         fs.unlink(`images/${filename}`, () => {
           Sauce.deleteOne({ _id: req.params.id })
@@ -76,55 +90,47 @@ export const deleteSauce = (req: Request, res: Response): void => {
 //Liker une sauce
 export const likeSauce = async (req: Request, res: Response) => {
     const authRequest = req as AuthRequest;
-    const sauceId = req.params.id;
+    if (req.body.like === 1) { 
+            Sauce.findOne({ _id: req.params.id })
+            .then(async (sauceFind) => {
 
-    try {
-        Sauce.findOne({ _id: sauceId })
-        .then(async sauce => {
-            if (!sauce) {
-                return res.status(404).json({ error: 'Sauce non trouvée' });
-            }
-            
-            if(req.body.like == 1){
-                // l'utilisateur a liké
-                console.log("UTILISATEUR a LIKE");
+                let likes = sauceFind?.likes;
+                const usersLiked = sauceFind?.usersLiked;
 
-                let userIdStr = authRequest.auth.userId;
-                console.log('userIdStr', userIdStr);
-                   // Récupération du champ _id, pourquoi erreur ?
-                sauce.likes += req.body.like;
-                const updatedSauce = await Sauce.findOneAndUpdate({ _id: sauceId }, sauce, {
-                    new: true,
-                    runValidators: true
-                });
+                if (!usersLiked?.includes(authRequest.auth.userId)) {
+                    likes = Number(likes) + 1;
+                    usersLiked?.push(authRequest.auth.userId);
 
-                // console.log(updatedSauce);
-            } else if (req.body.like == -1){
-                // l'utilisateur a disliké
-                console.log("UTILISATEUR a DISLIKE");
-                sauce.dislikes = new Number(sauce.dislikes.valueOf() + (req.body.like)*-1);
+                    let sauceObject = req.body;
 
-                const updatedSauce = await Sauce.findOneAndUpdate({ _id: sauceId }, sauce, {
-                    new: true,
-                    runValidators: true
-                });
+                    sauceObject = {
+                        ...sauceObject,
+                        likes: likes,
+                        usersLiked: usersLiked
+                    };
+                    await Sauce.findOneAndUpdate({ _id: req.params.id }, sauceObject, {
+                        new: true,
+                        runValidators: true
+                    });
+                    res.status(200).json({ message: 'Sauce liké !'});
+                } else {
+                    res.status(400);
+                }
+            })
+        .catch((error: Error) => res.status(500).json({ error }));
+      } else if (req.body.like === -1) {
+        
+      } else {
 
-                // console.log(updatedSauce);
-            } else {
+        // Cas ou on enlève le like ou dislike
 
-            }
-            sauce.imageUrl = `http://localhost:${process.env.port || 3000}/${sauce.imageUrl}`;
-
-            res.status(200).json(sauce);
-        })
-        // if (!updatedSauce) {
-        //     return res.status(404).json({ error: 'Sauce non trouvée' });
-        // }
-
-        //res.status(200).json({ message: 'Sauce modifiée !', sauce: updatedSauce });
-    } catch (error) {
-        res.status(400).json({ error });
-    }
+        Sauce.findOne({ _id: req.params.id })
+          .then((sauce) => {
+            console.log()
+          })
+          .catch((error) => res.status(400).json({ error }));
+      }
+      
 };
 
 //Création d'une sauce
