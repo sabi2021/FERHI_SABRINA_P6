@@ -24,7 +24,7 @@ export class AuthService {
   }
 
   getUserId() {
-    return this.userId;
+    return "64499a4b302ed1761931229e";
   }
 
   loginUser(email: string, password: string) {
