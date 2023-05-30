@@ -40,8 +40,6 @@ export const modifySauce = async (req: Request, res: Response) => {
         if (!sauce) {
             return res.status(404);
         }
-        console.log((req as AuthRequest).auth.userId);
-        console.log(sauce.userId);
 
         //On refuse la modification à l'utilisateur qui n'est pas propriétaire de la sauce
         if ((req as AuthRequest).auth.userId !== sauce.userId) {
@@ -55,7 +53,6 @@ export const modifySauce = async (req: Request, res: Response) => {
                 imageUrl: req.file.path //on met le chemin de la nouvelle image
             };
 
-            console.log(sauce.schema?.obj.imageUrl);
             //Suppression de l'ancienne image
             const filename = sauce?.imageUrl.split('images\\')[1];
             fs.unlink(`images/${filename}`, () => {
@@ -78,9 +75,6 @@ export const modifySauce = async (req: Request, res: Response) => {
 export const deleteSauce = (req: Request, res: Response): void => {
     Sauce.findOne({ _id: req.params.id })
       .then((sauceFind) => {
-
-
-
         const filename = sauceFind?.imageUrl.split('/images/')[1];
         fs.unlink(`images/${filename}`, () => {
           Sauce.deleteOne({ _id: req.params.id })
