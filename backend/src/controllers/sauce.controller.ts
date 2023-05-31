@@ -75,13 +75,22 @@ export const modifySauce = async (req: Request, res: Response) => {
 export const deleteSauce = (req: Request, res: Response): void => {
     Sauce.findOne({ _id: req.params.id })
       .then((sauceFind) => {
+
+   //On refuse la suppression à l'utilisateur qui n'est pas propriétaire de la sauce
+
+        if ((req as AuthRequest).auth.userId !==sauceFind?.userId) {
+            return res.status(401).json({ message: 'Pas le droit de suprimer cette sauce !'});
+        }
         const filename = sauceFind?.imageUrl.split('/images/')[1];
         fs.unlink(`images/${filename}`, () => {
           Sauce.deleteOne({ _id: req.params.id })
+
             .then(() => res.status(200).json({ message: 'Sauce supprimée !'}))
+            
             .catch((error: Error) => res.status(400).json({ error }));
         });
       })
+      
       .catch((error: Error) => res.status(500).json({ error }));
   };
   
